@@ -1,0 +1,193 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title></title>
+    <script src="jquery-1.4.2/jquery.min.js"></script>
+    <script language="javascript">
+        function Search() {
+            var msg = document.getElementById("input").value;
+        jQuery.ajax({
+                url: 'data.aspx',
+                type: 'get',
+                data: 'path=' + msg,
+                success: function (data) {
+                
+                    var jsondata = jQuery.parseJSON(data);
+                    display(jsondata);
+                }
+            });
+
+        }
+        function display(f) {
+            
+             var msg = document.getElementById("input").value;
+              var table = document.getElementById("table1");
+              var tbody = document.getElementById("body1");
+              var rowNum = table.rows.length;
+              for (i = 1; i < rowNum; i++) {
+                  table.deleteRow(i);
+                  rowNum = rowNum - 1;
+                  i = i - 1;
+              }
+              if (f!=null) {
+                  for (var i = 0; i < f.length; i++) {
+                      var tr = tbody.insertRow(0);
+                      if (f[i].size == "/") {
+                          var button2 = document.createElement("input");
+                          button2.setAttribute("type", "button");
+                          button2.value = f[i].filename;
+                          button2.name = f[i].filename;
+                          if (button2.attachEvent) {
+                              button2.attachEvent('onclick', tonext)
+                          } else {
+                              button2.addEventListener('click', tonext)
+                          }
+
+
+                          tr.appendChild(button2);
+                      } else {
+                          var th = document.createElement("th");
+                          th.innerHTML = f[i].filename;
+                          tr.appendChild(th);
+                      }
+                      var th1 = document.createElement("th");
+                      th1.innerHTML = f[i].size;
+                      var th2 = document.createElement("th");
+                      th2.innerHTML = f[i].time;
+                      
+                      tr.appendChild(th1);
+                      tr.appendChild(th2);
+                      if (f[i].size != "/") {
+
+                          var button = document.createElement("input");
+                          button.setAttribute("type", "button");
+                          button.value = "删除";
+                          button.name = f[i].filename;
+                          if (button.attachEvent) {
+                              button.attachEvent('onclick', remove)
+                          } else {
+                              button.addEventListener('click', remove)
+                          }
+
+
+                          tr.appendChild(button);
+                      } else {
+                          var th3 = document.createElement("th");
+                          th3.innerHTML = "/";
+                          tr.appendChild(th3);
+                      }
+                  }
+              }
+        }
+        function tonext() {
+            var msg = this.name;
+           
+            document.getElementById("input").value = msg;
+            jQuery.ajax({
+                url: 'data.aspx',
+                type: 'get',
+                data: 'path=' + msg,
+                success: function (data) {
+                    
+                    var jsondata = jQuery.parseJSON(data);
+                    
+                    display(jsondata);
+                }
+            });
+        }
+        function remove() {
+            var addr = this.name;
+            var msg = document.getElementById("input").value;
+            jQuery.ajax({
+                url: 'remove.aspx',
+                type: 'get',
+                data: 'path=' + msg+'&name='+addr,
+                success: function (data) {
+
+                    var jsondata = jQuery.parseJSON(data);
+                    display(jsondata);
+                }
+            });
+        }
+
+        function sortbytime() {
+            var msg = document.getElementById("input").value;
+            jQuery.ajax({
+                url: 'sort.aspx',
+                type: 'get',
+                data: 'path=' + msg + '&oper=time',
+                success: function (data) {
+
+                    var jsondata = jQuery.parseJSON(data);
+                    display(jsondata);
+                }
+            });
+        }
+        function back() {
+
+            var msg = document.getElementById("input").value;
+            var arr = msg.split("\\");
+            var result="";
+            for (var i = 0; i < arr.length - 1; i++) {
+               if(i!=arr.length-2)
+                   result = result + arr[i] + "\\";
+               else {
+                   result = result + arr[i];
+               }
+                
+            }
+            document.getElementById("input").value = result;
+            jQuery.ajax({
+                url: 'data.aspx',
+                type: 'get',
+                data: 'path=' + result,
+                success: function (data) {
+
+                    var jsondata = jQuery.parseJSON(data);
+                    display(jsondata);
+                }
+            });
+        }
+        function sortbysize() {
+            var msg = document.getElementById("input").value;
+            jQuery.ajax({
+                url: 'sort.aspx',
+                type: 'get',
+                data: 'path=' + msg + '&oper=size',
+                success: function (data) {
+
+                    var jsondata = jQuery.parseJSON(data);
+                    display(jsondata);
+                }
+            });
+        }
+        
+    </script>
+</head>
+<body>
+    <h2 align="center">文件查询系统</h2>
+    <div align="center">
+    <input type="text"  id="input" width="200" />
+    <input type="button"  onclick="Search()" value="确定" />
+        <input type="button" onclick="back()" value="返回上一级" />
+        <input type="button" onclick="sortbysize()" value="按大小排序" />
+        <input type="button" onclick="sortbytime()" value="按时间排序" />
+      
+        </div>
+    <table border="1" align="center" id="table1"> 
+        <thead>
+        <tr bgcolor="yellow">
+            <td width="200px" align="center">文件名称</td>
+            <td width="100px" align="center">文件大小</td>
+            <td width="100px" align="center">创建时间</td>
+            <td width="100px" align="center">删除</td>
+        </tr>
+            </thead>
+        <tbody id="body1">
+            
+        </tbody>
+    </table>
+    
+</body>
+</html>
